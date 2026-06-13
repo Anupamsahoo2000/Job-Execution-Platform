@@ -19,22 +19,26 @@ A real-time, fault-tolerant **Distributed Job Execution System** where users can
 ## Installation & Setup
 
 ### Prerequisites
+
 - **Node.js** (v18 or higher recommended)
 - **PostgreSQL** database server
 
 ### 1. Database Configuration
+
 Create a database in PostgreSQL named `jobdb` (or configure a custom name).
 
 Update the environment settings in `backend/.env` with your PostgreSQL credentials:
+
 ```env
-PORT=3000
-DB_NAME=jobdb
-DB_USER=postgres
+PORT=your_port_number
+DB_NAME=your_database_name
+DB_USER=your_postgres_user
 DB_PASSWORD=your_postgres_password
-DB_HOST=localhost
+DB_HOST=your_postgres_host
 ```
 
 ### 2. Install Dependencies
+
 Run npm install in both the backend and frontend directories:
 
 ```bash
@@ -54,23 +58,31 @@ npm install
 To run the full stack, you need to open multiple terminal windows:
 
 ### Step 1: Start the Backend Server
+
 Starts the API gateway, scheduler, and crash detector:
+
 ```bash
 cd backend
 npm run dev
 ```
+
 The server will start on `http://localhost:3000`.
 
 ### Step 2: Start the Frontend Dashboard
+
 Starts the Vite React development server:
+
 ```bash
 cd frontend
 npm run dev
 ```
+
 Open your browser and navigate to `http://localhost:5173/`.
 
 ### Step 3: Spawn Worker Instances
+
 Spawn one or more simulated worker processes. You can run these in separate terminal windows:
+
 ```bash
 cd backend
 # Starts Worker-Alpha
