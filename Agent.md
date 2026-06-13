@@ -18,15 +18,14 @@ This document details the AI tools, workflows, and prompts utilized during the d
 
 **Prompt to Claude:**
 
-> "I am building a Distributed Job Execution System using Node.js (Express), Sequelize, and PostgreSQL. Users will submit computational jobs to a queue, and independent worker processes (running separately) will register and process them.
+> "hey i need help making a distributed job execution system in nodejs express and postgres using sequelize.
 >
-> Can you design a clean database schema using Sequelize? I think I need:
+> can u help me design the db schema? i need 3 tables:
+> 1. Job (type, priority, status, progress, max retries, attempts, results, error, worker_id)
+> 2. Worker (status, last heartbeat time, cpu/memory usage)
+> 3. JobLog (to keep logs for each job)
 >
-> 1. A `Job` model (with type, priority, status like pending/running/completed/failed, progress, max retries, current attempt count, results payload, error stack, and reference to assigned worker).
-> 2. A `Worker` model (with status, last heartbeat timestamp, and resource metrics like CPU/Memory).
-> 3. A `JobLog` model to store sequential execution logs of each job.
->
-> Please write the Sequelize model definitions and configure associations where a Job can have many logs and belongs to a Worker."
+> write the sequelize models and set up the relations (job has many logs, belongs to worker)"
 
 ---
 
@@ -34,11 +33,12 @@ This document details the AI tools, workflows, and prompts utilized during the d
 
 **Prompt to Claude:**
 
-> "I need to implement worker heartbeat monitoring and failure recovery.
-> Each worker will call a POST `/api/workers/:id/heartbeat` endpoint every 5 seconds.
-> I want a background service in Express that runs every 5 seconds, checks for workers that haven't sent a heartbeat in over 15 seconds, marks them as DEAD, and checks if they were running a job. If they were running a job, I want to reschedule that job (change status back to PENDING, clear workerId) if its attempt count is less than `maxRetries`. Otherwise, fail the job permanently.
+> "how do i do worker heartbeat monitoring and crash recovery?
+> my workers send a POST to /api/workers/:id/heartbeat every 5s.
+> i need a background loop in express that runs every 5s. it should find workers that haven't pinged in 15s and mark them DEAD.
+> if a dead worker was running a job, reschedule the job to PENDING if attempts < maxRetries. if not, mark the job FAILED.
 >
-> Can you write the Sequelize logic for this crash detection loop?"
+> write the sequelize code for this loop"
 
 ---
 
@@ -46,9 +46,9 @@ This document details the AI tools, workflows, and prompts utilized during the d
 
 **Prompt to ChatGPT:**
 
-> "For my dashboard, I want to show real-time stats (counts of pending/running/completed jobs), active worker metrics, and a rolling log of system events (like 'Job #123 assigned to Worker-A', 'Worker-B crashed').
-> I don't want to use heavy libraries like Socket.io. Can you show me how to write a Server-Sent Events (SSE) `/api/events` endpoint in Express using a standard Node `EventEmitter`?
-> Also, show me how to connect to this SSE endpoint in React using the native `EventSource` web API and update my component state."
+> "i want to show real time stats on my react dashboard (pending/running jobs, worker metrics, system logs).
+> i dont wanna use socket.io cuz its too heavy. how do i do server sent events (SSE) in express using Node's EventEmitter?
+> and how do i listen to this in react using EventSource to update my state?"
 
 ---
 
@@ -56,19 +56,22 @@ This document details the AI tools, workflows, and prompts utilized during the d
 
 **Prompt to Claude:**
 
-> "Write a standalone command-line Node.js script called `worker.js`. When started (e.g. `node worker.js --name Worker-Alpha`), it should:
+> "can u write a standalone nodejs script called worker.js?
+> it should take a name arg like `node worker.js --name worker1`.
 >
-> 1. Register itself with the backend server at `http://localhost:3000` to get a `workerId`.
-> 2. Start a 5-second interval heartbeat loop that reports CPU/Memory metrics.
-> 3. Start a 2-second interval polling loop. If it finds a job assigned to it, it should execute it.
-> 4. I want the worker to support different simulated jobs:
->    - A delay job (simulate processing time and send progress reports).
->    - A math job (calculate Fibonacci iteratively and send the result).
->    - A sorting job (sort a large array in memory).
->    - A failure simulation (throws an error at 50% progress).
->    - A crash simulation (abruptly kills its own process using `process.exit(1)` at 50% progress to test server-side recovery).
+> it needs to:
+> 1. register with my backend at localhost:3000 to get an id
+> 2. send a heartbeat every 5s with fake cpu/ram usage
+> 3. poll for jobs every 2s and run them if assigned
 >
-> Please make sure it reports progress and logs back to the server using REST APIs."
+> make it support 5 fake job types:
+> - delay
+> - math (calc fibonacci so it actually uses cpu)
+> - sort (sort big array)
+> - failure sim (throw error at 50%)
+> - crash sim (process.exit(1) at 50% to test recovery)
+>
+> make sure it sends progress and logs to the backend API"
 
 ---
 
@@ -76,12 +79,13 @@ This document details the AI tools, workflows, and prompts utilized during the d
 
 **Prompt to Claude:**
 
-> "Help me build a premium dark-themed React dashboard using Tailwind CSS. It should have:
+> "help me make a cool dark theme react dashboard with tailwind css.
 >
-> 1. A stats grid at the top showing metrics (Active workers, pending queue, running, completed, failed) with clean gradients and icons.
-> 2. A left column with a job submission form and a list of worker instances showing their live CPU/Memory bars. If no workers are online, show terminal instructions on how to start one.
-> 3. A right column with a table of jobs showing progress bars, priority badges, and an option to view job logs.
-> 4. A black, terminal-style console at the bottom showing live scrolled system logs from the SSE connection."
+> it needs:
+> 1. top stats grid (active workers, pending, running, completed, failed) with nice gradients/icons
+> 2. left column: form to submit jobs and a list of active workers with live cpu/ram progress bars. if no workers, show a code snippet on how to start one.
+> 3. right column: table of jobs with progress bars, priority tags, and a button to view logs
+> 4. bottom: a fake terminal console showing live system logs from the SSE stream."
 
 ---
 
